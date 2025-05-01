@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { FaShoppingCart } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Cake = () => {
+  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
 
   const cakeItem = {
@@ -145,6 +147,13 @@ const Cake = () => {
           <button style={styles.button} onClick={addToCart}>
             Add to Cart
           </button>
+          <div style={{gap: '1rem'}}>
+          <button style={ styles.button} onClick={() => navigate('/payment')}>
+            Buy Now
+          </button>
+          </div>
+
+
         </div>
       </div>
 
