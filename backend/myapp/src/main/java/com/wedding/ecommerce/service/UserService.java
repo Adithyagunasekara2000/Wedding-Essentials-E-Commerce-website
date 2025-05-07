@@ -1,5 +1,7 @@
 package com.wedding.ecommerce.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +14,8 @@ import com.wedding.ecommerce.dto.RegisterRequest;
 import com.wedding.ecommerce.model.User;
 import com.wedding.ecommerce.repository.UserRepository;
 import com.wedding.ecommerce.util.JwtUtil;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class UserService {
@@ -36,7 +40,8 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setPassword(encoder.encode(request.getPassword()));
-        
+        user.setRole("USER"); 
+
         // Save user
         User savedUser = userRepo.save(user);
         
@@ -49,7 +54,8 @@ public class UserService {
             savedUser.getName(),
             savedUser.getEmail(),
             savedUser.getPhone(),
-            token
+            token,
+            savedUser.getRole() 
         );
     }
 
@@ -67,10 +73,30 @@ public class UserService {
                 user.getName(),
                 user.getEmail(),
                 user.getPhone(),
-                token
+                token,
+                user.getRole()
             );
         } else {
             throw new BadCredentialsException("Invalid credentials");
         }
     }
+    
+    @PostConstruct
+    public void createDefaultAdmin() {
+        if (!userRepo.existsByEmail("admin@wedding.com")) {
+            User admin = new User();
+            admin.setName("Admin");
+            admin.setEmail("admin@wedding.com");
+            admin.setPhone("0000000000");
+            admin.setPassword(encoder.encode("admin123")); // strong password in real use
+            admin.setRole("ADMIN");
+            userRepo.save(admin);
+        }
+    }
+    
+    public List<User> getAllUsers(){
+    	return userRepo.findAll();
+    }
+    
+    
 }

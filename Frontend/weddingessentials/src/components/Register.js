@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -64,15 +65,24 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    console.log('Registered:', formData);
-    navigate('/login');
+  
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/register', formData);
+      alert("Registration successful!");
+      navigate('/login');
+    } catch (error) {
+      alert(error.response?.data || "Registration failed.");
+    }
   };
+  
 
   return (
     <div style={styles.container}>

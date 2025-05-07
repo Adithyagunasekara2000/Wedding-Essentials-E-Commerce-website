@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -47,10 +48,22 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Logged in with:', formData);
-    navigate('/');
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/login', formData);
+      
+      if (response.data.role === 'ADMIN') {
+        navigate('/AdminDashboard')
+      } else {
+        navigate('/');
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      alert('Invalid credentials');
+    }
   };
 
   return (
