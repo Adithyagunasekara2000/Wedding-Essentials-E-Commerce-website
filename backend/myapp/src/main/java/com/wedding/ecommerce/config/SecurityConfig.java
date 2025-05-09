@@ -32,6 +32,9 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // login/register endpoints
+                .requestMatchers("/admin/products/**").permitAll() 
+                .requestMatchers("/admin/**").permitAll()// Allow access to the test endpoint
+                .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // admin only endpoints
                 .anyRequest().authenticated()
             )
@@ -42,6 +45,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+    
 
     @Bean
     public PasswordEncoder passwordEncoder() {

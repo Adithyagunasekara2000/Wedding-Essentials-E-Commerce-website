@@ -8,6 +8,11 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Use consistent API base URL
+  const API_BASE_URL = 'http://localhost:8080';
 
   const styles = {
     container: {
@@ -42,6 +47,11 @@ const Login = () => {
       color: '#555',
       cursor: 'pointer',
     },
+    error: {
+      color: 'red',
+      marginBottom: '1rem',
+      textAlign: 'center',
+    }
   };
 
   const handleChange = (e) => {
@@ -50,25 +60,61 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setError('');
+    setLoading(true);
+    
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', formData);
+      console.log('Attempting login with:', { email: formData.email, password: '***' });
+      console.log(`Sending request to: ${API_BASE_URL}/api/auth/login`);
       
-      if (response.data.role === 'ADMIN') {
-        navigate('/AdminDashboard')
-      } else {
-        navigate('/');
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
+      
+      console.log('Login response:', response.data);
+      
+      // Store the token in localStorage
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        
+        // Also store user role for easy access
+        localStorage.setItem('userRole', response.data.role);
+        
+        // Configure axios to use the token for all future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       }
       
+      if (response.data.role === 'ADMIN') {
+        console.log('Navigating to admin dashboard');
+        navigate('/AdminDashboard');
+      } else {
+        console.log('Navigating to home page');
+        navigate('/');
+      }
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      alert('Invalid credentials');
+      console.error('Login error details:', {
+        message: error.message,
+        response: error.response,
+        request: error.request
+      });
+      
+      if (error.response) {
+        // The server responded with a status code outside the 2xx range
+        setError(`Server error: ${error.response.status} - ${error.response.data || 'Invalid credentials'}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError('No response from server. Please check if your backend is running and the URL is correct.');
+      } else {
+        // Something happened in setting up the request
+        setError(`Error: ${error.message}`);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
       <h2 style={{ textAlign: 'center' }}>Login</h2>
+      {error && <div style={styles.error}>{error}</div>}
       <form onSubmit={handleSubmit}>
         <input
           style={styles.input}
@@ -88,7 +134,13 @@ const Login = () => {
           onChange={handleChange}
           required
         />
-        <button style={styles.button} type="submit">Login</button>
+        <button 
+          style={styles.button} 
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
         <span style={styles.link} onClick={() => navigate('/register')}>
           Don't have an account? Register
         </span>
@@ -98,3 +150,4 @@ const Login = () => {
 };
 
 export default Login;
+

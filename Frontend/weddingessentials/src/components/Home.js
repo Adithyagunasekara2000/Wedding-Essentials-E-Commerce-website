@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 const Home = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
-  
+  const navigate = useNavigate();
   // Navigation function (simulating router navigation)
   const navigateTo = (path) => {
     console.log(`Navigating to: ${path}`);
@@ -282,7 +282,7 @@ const Home = () => {
           <h1 style={styles.heroTitle}>Your Perfect Day</h1>
           <p style={styles.heroSubtitle}>Everything you need to make your wedding day unforgettable</p>
           <button 
-            onClick={() => navigateTo('/register')} 
+            onClick={() => navigate('/login')} 
             style={{...styles.ctaButton, backgroundColor: hoveredCategory === 'cta' ? '#c27862' : '#d48872'}}
             onMouseEnter={() => setHoveredCategory('cta')}
             onMouseLeave={() => setHoveredCategory(null)}
@@ -346,7 +346,7 @@ const Home = () => {
             <p style={styles.testimonialText}>"Wedding Essentials made our special day absolutely perfect. From the stunning cake to the beautiful invitations, everything exceeded our expectations!"</p>
             <div style={styles.testimonialAuthor}>
               <div style={styles.testimonialAvatar}>
-                <img src="/api/placeholder/50/50" alt="Customer" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                <img src="/images/wedding2.jpg" alt="Customer" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
               </div>
               <div style={styles.testimonialInfo}>
                 <p style={styles.testimonialName}>Sarah & Michael</p>

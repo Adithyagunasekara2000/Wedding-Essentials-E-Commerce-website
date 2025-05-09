@@ -10,25 +10,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/admin/products")
-@CrossOrigin
 public class ProductController {
-
     @Autowired
     private ProductService productService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Product addProduct(
-        @RequestParam String name,
-        @RequestParam String description,
-        @RequestParam double price,
-        @RequestParam String category,
-        @RequestParam MultipartFile image
+        @RequestParam("name") String name,
+        @RequestParam("description") String description,
+        @RequestParam("price") double price,
+        @RequestParam("category") String category,
+        @RequestParam("image") MultipartFile image
     ) throws IOException {
         return productService.saveProduct(name, description, price, category, image);
     }
-
 
     @GetMapping
     public List<Product> getAllProducts() {
@@ -52,9 +51,14 @@ public class ProductController {
         return productService.updateProduct(id, name, description, price, category, image);
     }
 
-
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
+    }
+
+    // Test endpoint to check if the backend is running
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Backend is running!");
     }
 }
