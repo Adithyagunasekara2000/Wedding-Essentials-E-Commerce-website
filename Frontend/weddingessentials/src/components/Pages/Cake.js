@@ -1,15 +1,18 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Heart, Share2, ArrowLeft, Star } from 'lucide-react';
-import { FaShoppingCart } from 'react-icons/fa';
 import axios from 'axios';
+import { useCart } from './CartContext';
+import CartDisplay from './CartDisplay';
 
 const Cake = () => {
-  const [cart, setCart] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [isWishlist, setIsWishlist] = useState(false);
   const [cakes, setCakes] = useState([]);
   const [mainCake, setMainCake] = useState(null);
+  
+  // Use the cart context instead of local state
+  const { addToCart, itemCount } = useCart();
 
   useEffect(() => {
     axios.get('http://localhost:8080/admin/products/cake')
@@ -25,10 +28,33 @@ const Cake = () => {
       });
   }, []);
 
-  const addToCart = () => {
+  
+  const getFixedImagePath = (imagePath) => {
+    if (!imagePath) return '';
+    
+   
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+   
+    if (imagePath.includes(':\\')) {
+      const parts = imagePath.split('\\');
+      return `/uploads/${parts[parts.length - 1]}`;
+    }
+    
+    
+    return `/uploads/${imagePath}`;
+  };
+
+  const handleAddToCart = () => {
     if (!mainCake) return;
-    const itemWithQuantity = { ...mainCake, quantity };
-    setCart([...cart, itemWithQuantity]);
+    const itemWithQuantity = { 
+      ...mainCake, 
+      quantity,
+      type: 'cake' 
+    };
+    addToCart(itemWithQuantity);
   };
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
@@ -36,6 +62,7 @@ const Cake = () => {
   const toggleWishlist = () => setIsWishlist(!isWishlist);
 
   if (!mainCake) return <div>Loading cake...</div>;
+  
   // Inline styles
   const styles = {
     // Layout and containers
@@ -52,128 +79,7 @@ const Cake = () => {
       margin: '0 auto',
       padding: '0 16px'
     },
-    cartFloatingIcon: {
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      backgroundColor: '#d48872',
-      borderRadius: '50%',
-      width: '60px',
-      height: '60px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      color: 'white',
-      fontSize: '1.8rem',
-      cursor: 'pointer',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-      zIndex: 100,
-    },
-    cartCount: {
-      position: 'absolute',
-      top: '-5px',
-      right: '-5px',
-      backgroundColor: 'white',
-      color: '#d48872',
-      borderRadius: '50%',
-      padding: '2px 6px',
-      fontSize: '0.75rem',
-      fontWeight: 'bold',
-    },
-    cartSection: {
-      marginTop: '2rem',
-      borderTop: '1px solid #eee',
-      paddingTop: '1rem',
-    },
-    // Header
-    header: {
-      backgroundColor: '#f9e0e3',
-      color: '#9d2235',
-      padding: '16px',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 50
-    },
-    headerContainer: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    headerLeft: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px'
-    },
-    backButton: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '8px',
-      borderRadius: '50%',
-      backgroundColor: 'transparent',
-      color: '#9d2235',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s',
-      border: 'none'
-    },
-    headerTitle: {
-      fontSize: '20px',
-      fontWeight: 600,
-      margin: 0
-    },
-    cartButton: {
-      position: 'relative',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '8px',
-      borderRadius: '50%',
-      backgroundColor: 'transparent',
-      color: '#9d2235',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s',
-      border: 'none'
-    },
-    cartBadge: {
-      position: 'absolute',
-      top: '-4px',
-      right: '-4px',
-      backgroundColor: '#9d2235',
-      color: '#fff',
-      fontSize: '12px',
-      height: '20px',
-      width: '20px',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontWeight: 'bold'
-    },
-    
-    // Breadcrumb
-    breadcrumb: {
-      backgroundColor: '#f9f9f9',
-      padding: '8px 16px'
-    },
-    breadcrumbText: {
-      fontSize: '14px',
-      color: '#666'
-    },
-    
-    // Main Content
-    main: {
-      flexGrow: 1,
-      padding: '16px'
-    },
-    productGrid: {
-      display: 'grid',
-      gridTemplateColumns: '1fr',
-      gap: '32px',
-      marginBottom: '40px'
-    },
-    
-   
+    // Image Section
     imageContainer: {
       backgroundColor: '#f9f9f9',
       borderRadius: '8px',
@@ -251,13 +157,6 @@ const Cake = () => {
     tabContent: {
       color: '#444',
       lineHeight: 1.6
-    },
-    detailItem: {
-      marginBottom: '16px'
-    },
-    detailLabel: {
-      fontWeight: 600,
-      marginBottom: '4px'
     },
     
     // Quantity Selector
@@ -464,6 +363,18 @@ const Cake = () => {
       textAlign: 'center'
     },
     
+    // Main Content
+    main: {
+      flexGrow: 1,
+      padding: '16px'
+    },
+    productGrid: {
+      display: 'grid',
+      gridTemplateColumns: '1fr',
+      gap: '32px',
+      marginBottom: '40px'
+    },
+    
     // Media Queries
     '@media (min-width: 768px)': {
       productGrid: {
@@ -477,7 +388,7 @@ const Cake = () => {
       }
     }
   };
-
+  
   // Apply media queries for responsive design
   const applyMediaStyles = (baseStyle, props) => {
     const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
@@ -492,17 +403,19 @@ const Cake = () => {
 
   return (
     <div style={styles.page}>
-  
       {/* Main Content */}
       <main style={styles.main}>
         <div style={styles.container}>
           <div style={applyMediaStyles(styles.productGrid, 'productGrid')}>
             {/* Image Section */}
             <div style={styles.imageContainer}>
-            {mainCake?.imagePath && (
-  <img src={`http://localhost:8080${mainCake.imagePath}`} alt={mainCake.name} />
-)}
-
+              {mainCake?.imagePath && (
+                <img 
+                  src={`http://localhost:8080${getFixedImagePath(mainCake.imagePath)}`} 
+                  alt={mainCake.name}
+                  style={{ width: '100%', height: 'auto' }}
+                />
+              )}
             </div>
 
             {/* Product Details */}
@@ -556,9 +469,7 @@ const Cake = () => {
 
               {/* Tab Content */}
               <div style={styles.tabContent}>
-               
-                  <p>{mainCake.description}</p>
-                
+                <p>{mainCake.description}</p>
               </div>
 
               {/* Quantity Selector */}
@@ -581,19 +492,11 @@ const Cake = () => {
                 </div>
               </div>
 
-                <div style={styles.cartFloatingIcon}>
-                      <FaShoppingCart />
-                      {cart.length > 0 && (
-                        <span style={styles.cartCount}>{cart.length}</span>
-                      )}
-                    </div>
-              
-
               {/* Action Buttons */}
               <div style={applyMediaStyles(styles.actionButtons, 'actionButtons')}>
                 <button 
                   style={styles.addToCartButton}
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                 >
                   <ShoppingCart size={18} style={styles.buttonIcon} />
                   Add to Cart
@@ -631,22 +534,21 @@ const Cake = () => {
           <section style={styles.relatedSection}>
             <h2 style={styles.sectionTitle}>You May Also Like</h2>
             <div style={styles.relatedGrid}>
-            {cakes.map((item) => (
-          <div key={item.id} style={styles.relatedItem}>
-            <div style={styles.relatedImageContainer}>
-              <img 
-                  src={`http://localhost:8080${mainCake.imagePath}`}
-                alt={item.name} 
-                style={styles.relatedImage} 
-              />
-            </div>
-            <div style={styles.relatedDetails}>
-              <h3 style={styles.relatedTitle}>{item.name}</h3>
-              <p style={styles.relatedPrice}>${item.price.toFixed(2)}</p>
-            </div>
-          </div>
-        ))}
-
+              {cakes.map((item) => (
+                <div key={item.id} style={styles.relatedItem}>
+                  <div style={styles.relatedImageContainer}>
+                    <img 
+                      src={`http://localhost:8080${getFixedImagePath(item.imagePath)}`}
+                      alt={item.name} 
+                      style={styles.relatedImage} 
+                    />
+                  </div>
+                  <div style={styles.relatedDetails}>
+                    <h3 style={styles.relatedTitle}>{item.name}</h3>
+                    <p style={styles.relatedPrice}>${item.price.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         </div>
@@ -683,6 +585,9 @@ const Cake = () => {
           </div>
         </div>
       </footer>
+
+      {/* Cart Display Component */}
+      <CartDisplay />
     </div>
   );
 };

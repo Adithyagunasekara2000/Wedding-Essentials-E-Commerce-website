@@ -240,6 +240,22 @@ const AdminDashboard = () => {
     });
     setSelectedProduct(null);
   };
+  const extractFilename = (path) => {
+  if (!path) return '';
+  
+  // For Windows paths (C:\path\to\file.jpg)
+  if (path.includes('\\')) {
+    return path.split('\\').pop();
+  }
+  
+  // For Unix paths (/path/to/file.jpg)
+  if (path.includes('/')) {
+    return path.split('/').pop();
+  }
+  
+  // If it's just a filename already
+  return path;
+};
 
   return (
     <div className="admin-container">
@@ -304,16 +320,15 @@ const AdminDashboard = () => {
                   <tbody>
                     {products.map(product => (
                       <tr key={product.id}>
-                        <td>{product.id}</td>
-                        <td>
-                          {product.imagePath && (
-                            <img 
-                              src={`${API_BASE_URL}${product.imagePath}`} 
-                              alt={product.name} 
-                              className="product-thumbnail" 
-                            />
-                          )}
-                        </td>
+                       <td>
+  {product.imagePath && (
+    <img 
+      src={`${API_BASE_URL}/uploads/${extractFilename(product.imagePath)}`}
+      alt={product.name} 
+      className="product-thumbnail" 
+    />
+  )}
+</td>
                         <td>{product.name}</td>
                         <td>{product.category}</td>
                         <td className="description-cell">{product.description}</td>
@@ -566,25 +581,25 @@ const AdminDashboard = () => {
                     required
                   >
                     <option value="">Select Category</option>
-                    <option value="Invitations">Invitations</option>
-                    <option value="Cakes">Cakes</option>
-                    <option value="Favors">Favors</option>
-                    <option value="Decorations">Decorations</option>
+                    <option value="invitation">Invitations</option>
+                    <option value="cake">Cakes</option>
+                    <option value="favor">Favors</option>
+                    <option value="decoration">Decorations</option>
                   </select>
                 </div>
               </div>
               <div className="form-group">
                 <label htmlFor="edit-image">Product Image</label>
                 {selectedProduct.imagePath && (
-                  <div className="current-image">
-                    <p>Current image:</p>
-                    <img 
-                      src={`${API_BASE_URL}${selectedProduct.imagePath}`} 
-                      alt={selectedProduct.name}
-                      className="edit-thumbnail" 
-                    />
-                  </div>
-                )}
+  <div className="current-image">
+    <p>Current image:</p>
+    <img 
+      src={`${API_BASE_URL}/uploads/${extractFilename(selectedProduct.imagePath)}`}
+      alt={selectedProduct.name}
+      className="edit-thumbnail" 
+    />
+  </div>
+)}
                 <input
                   type="file"
                   id="edit-image"

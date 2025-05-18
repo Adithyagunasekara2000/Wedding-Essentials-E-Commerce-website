@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 const AddToCart = () => {
   const navigate = useNavigate();
   
-  // Example cart data (this would come from global state or context in a real app)
   const [cart, setCart] = useState([
     {
       id: 1,
@@ -15,7 +14,6 @@ const AddToCart = () => {
       price: 180,
       image: '/images/cake.jpeg',
     },
-    // Add more items here as needed
   ]);
 
   const removeFromCart = (id) => {
