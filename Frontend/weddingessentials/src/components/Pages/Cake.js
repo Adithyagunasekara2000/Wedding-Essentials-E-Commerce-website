@@ -1,8 +1,292 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Heart, Share2, ArrowLeft, Star } from 'lucide-react';
+import { ShoppingCart, Heart, Share2, ArrowLeft, Star, Eye } from 'lucide-react';
 import axios from 'axios';
 import { useCart } from './CartContext';
 import CartDisplay from './CartDisplay';
+
+// New component for related product items
+const RelatedProductItem = ({ product, addToCart }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [expanded, setExpanded] = useState(false);
+  
+  const getFixedImagePath = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    if (imagePath.includes(':\\')) {
+      const parts = imagePath.split('\\');
+      return `/uploads/${parts[parts.length - 1]}`;
+    }
+    return `/uploads/${imagePath}`;
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    addToCart({ ...product, quantity, type: 'cake' });
+  };
+  
+  const handleBuyNow = (e) => {
+    e.stopPropagation();
+    addToCart({ ...product, quantity, type: 'cake' });
+    // Navigate to checkout
+    // window.location.href = '/checkout';
+  };
+  
+  const incrementQuantity = (e) => {
+    e.stopPropagation();
+    setQuantity(prev => prev + 1);
+  };
+  
+  const decrementQuantity = (e) => {
+    e.stopPropagation();
+    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  };
+  
+  const toggleExpand = (e) => {
+    e.stopPropagation();
+    setExpanded(!expanded);
+  };
+
+  const styles = {
+    relatedItem: {
+      border: '1px solid #eee',
+      borderRadius: '8px',
+      overflow: 'hidden',
+      transition: 'box-shadow 0.3s',
+      position: 'relative',
+      boxShadow: isHovered ? '0 6px 16px rgba(0,0,0,0.1)' : 'none',
+      backgroundColor: '#fff'
+    },
+    relatedImageContainer: {
+      height: '160px',
+      backgroundColor: '#f9f9f9',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      cursor: 'pointer'
+    },
+    relatedImage: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      transition: 'transform 0.3s'
+    },
+    relatedDetails: {
+      padding: '12px'
+    },
+    relatedTitle: {
+      fontWeight: 500,
+      color: '#333',
+      fontSize: '16px',
+      margin: 0,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      cursor: 'pointer'
+    },
+    relatedPrice: {
+      color: '#9d2235',
+      fontWeight: 500,
+      fontSize: '16px',
+      marginTop: '8px',
+      margin: 0
+    },
+    ratingContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      marginTop: '4px',
+      marginBottom: '4px'
+    },
+    starContainer: {
+      display: 'flex',
+      color: '#ffc107'
+    },
+    expandButton: {
+      backgroundColor: 'transparent',
+      border: 'none',
+      color: '#9d2235',
+      cursor: 'pointer',
+      fontSize: '14px',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '8px 0',
+      marginTop: '8px'
+    },
+    // Options section (when expanded)
+    optionsSection: {
+      height: expanded ? 'auto' : '0',
+      overflow: 'hidden',
+      transition: 'height 0.3s',
+      borderTop: expanded ? '1px solid #eee' : 'none',
+      marginTop: expanded ? '12px' : '0',
+      paddingTop: expanded ? '12px' : '0'
+    },
+    // Quantity Selector
+    quantityContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      marginBottom: '12px'
+    },
+    quantityLabel: {
+      color: '#444',
+      fontSize: '14px'
+    },
+    quantitySelector: {
+      display: 'flex',
+      alignItems: 'center',
+      border: '1px solid #ddd',
+      borderRadius: '4px'
+    },
+    quantityButton: {
+      padding: '4px 8px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      cursor: 'pointer',
+      color: '#444',
+      fontSize: '14px'
+    },
+    quantityValue: {
+      padding: '4px 12px',
+      borderLeft: '1px solid #ddd',
+      borderRight: '1px solid #ddd',
+      fontSize: '14px'
+    },
+    // Action Buttons
+    actionButtons: {
+      display: 'flex',
+      gap: '8px',
+      marginTop: '12px'
+    },
+    addToCartButton: {
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#9d2235',
+      color: '#fff',
+      padding: '8px 12px',
+      borderRadius: '4px',
+      fontWeight: 500,
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '14px',
+      transition: 'background-color 0.2s'
+    },
+    buyNowButton: {
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f9e0e3',
+      color: '#9d2235',
+      padding: '8px 12px',
+      borderRadius: '4px',
+      fontWeight: 500,
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '14px',
+      transition: 'background-color 0.2s'
+    },
+    buttonIcon: {
+      marginRight: '6px'
+    }
+  };
+
+  return (
+    <div 
+      style={styles.relatedItem}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div 
+        style={styles.relatedImageContainer}
+        onClick={() => window.location.href = `/uploads/${product.id}`}
+      >
+        <img 
+          src={`http://localhost:8080${getFixedImagePath(product.imagePath)}`}
+          alt={product.name} 
+          style={{
+            ...styles.relatedImage,
+            transform: isHovered ? 'scale(1.05)' : 'scale(1)'
+          }} 
+        />
+      </div>
+      <div style={styles.relatedDetails}>
+        <h3 
+          style={styles.relatedTitle}
+          onClick={() => window.location.href = `/cake/${product.id}`}
+        >
+          {product.name}
+        </h3>
+        <div style={styles.ratingContainer}>
+          <div style={styles.starContainer}>
+            {[...Array(5)].map((_, i) => (
+              <Star 
+                key={i} 
+                size={14} 
+                fill={i < Math.floor(product.rating || 4)} 
+                color={i < Math.floor(product.rating || 4) ? "#ffc107" : "#d1d5db"}
+              />
+            ))}
+          </div>
+        </div>
+        <p style={styles.relatedPrice}>${product.price.toFixed(2)}</p>
+        
+        <button style={styles.expandButton} onClick={toggleExpand}>
+          {expanded ? 'Hide options' : 'Show options'}
+        </button>
+        
+        <div style={{
+          ...styles.optionsSection,
+          height: expanded ? 'auto' : '0',
+          opacity: expanded ? 1 : 0
+        }}>
+          {/* Quantity Selector */}
+          <div style={styles.quantityContainer}>
+            <span style={styles.quantityLabel}>Quantity:</span>
+            <div style={styles.quantitySelector}>
+              <button 
+                style={styles.quantityButton}
+                onClick={decrementQuantity}
+              >
+                -
+              </button>
+              <span style={styles.quantityValue}>{quantity}</span>
+              <button 
+                style={styles.quantityButton}
+                onClick={incrementQuantity}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div style={styles.actionButtons}>
+            <button 
+              style={styles.addToCartButton}
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart size={14} style={styles.buttonIcon} />
+              Add to Cart
+            </button>
+            <button 
+              style={styles.buyNowButton}
+              onClick={handleBuyNow}
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Cake = () => {
   const [quantity, setQuantity] = useState(1);
@@ -10,6 +294,8 @@ const Cake = () => {
   const [isWishlist, setIsWishlist] = useState(false);
   const [cakes, setCakes] = useState([]);
   const [mainCake, setMainCake] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   
   // Use the cart context instead of local state
   const { addToCart, itemCount } = useCart();
@@ -32,17 +318,14 @@ const Cake = () => {
   const getFixedImagePath = (imagePath) => {
     if (!imagePath) return '';
     
-   
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('/')) {
       return imagePath;
     }
     
-   
     if (imagePath.includes(':\\')) {
       const parts = imagePath.split('\\');
       return `/uploads/${parts[parts.length - 1]}`;
     }
-    
     
     return `/uploads/${imagePath}`;
   };
@@ -55,6 +338,20 @@ const Cake = () => {
       type: 'cake' 
     };
     addToCart(itemWithQuantity);
+    
+    // Show notification
+    setNotificationMessage(`${mainCake.name} added to cart!`);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
+
+  const handleRelatedProductAddToCart = (product) => {
+    addToCart(product);
+    
+    // Show notification
+    setNotificationMessage(`${product.name} added to cart!`);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
   };
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
@@ -255,46 +552,22 @@ const Cake = () => {
       fontSize: '24px',
       fontWeight: 'bold',
       color: '#333',
-      marginBottom: '24px'
+      marginBottom: '24px',
+      position: 'relative',
+      paddingBottom: '8px'
+    },
+    sectionTitleUnderline: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      width: '60px',
+      height: '3px',
+      backgroundColor: '#9d2235'
     },
     relatedGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-      gap: '16px'
-    },
-    relatedItem: {
-      border: '1px solid #eee',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      transition: 'box-shadow 0.2s'
-    },
-    relatedImageContainer: {
-      height: '160px',
-      backgroundColor: '#f9f9f9',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    relatedImage: {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover'
-    },
-    relatedDetails: {
-      padding: '12px'
-    },
-    relatedTitle: {
-      fontWeight: 500,
-      color: '#333',
-      fontSize: '14px',
-      margin: 0
-    },
-    relatedPrice: {
-      color: '#9d2235',
-      fontWeight: 500,
-      fontSize: '14px',
-      marginTop: '4px',
-      margin: 0
+      gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+      gap: '24px'
     },
     
     // Footer
@@ -373,6 +646,24 @@ const Cake = () => {
       gridTemplateColumns: '1fr',
       gap: '32px',
       marginBottom: '40px'
+    },
+    
+    // Notification
+    notification: {
+      position: 'fixed',
+      top: '20px',
+      right: '20px',
+      backgroundColor: '#4CAF50',
+      color: 'white',
+      padding: '12px 24px',
+      borderRadius: '4px',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+      zIndex: 1000,
+      opacity: showNotification ? 1 : 0,
+      transform: showNotification ? 'translateY(0)' : 'translateY(-20px)',
+      transition: 'opacity 0.3s, transform 0.3s',
+      display: 'flex',
+      alignItems: 'center'
     },
     
     // Media Queries
@@ -532,22 +823,17 @@ const Cake = () => {
 
           {/* Related Products Section */}
           <section style={styles.relatedSection}>
-            <h2 style={styles.sectionTitle}>You May Also Like</h2>
+            <h2 style={styles.sectionTitle}>
+              You May Also Like
+              <span style={styles.sectionTitleUnderline}></span>
+            </h2>
             <div style={styles.relatedGrid}>
               {cakes.map((item) => (
-                <div key={item.id} style={styles.relatedItem}>
-                  <div style={styles.relatedImageContainer}>
-                    <img 
-                      src={`http://localhost:8080${getFixedImagePath(item.imagePath)}`}
-                      alt={item.name} 
-                      style={styles.relatedImage} 
-                    />
-                  </div>
-                  <div style={styles.relatedDetails}>
-                    <h3 style={styles.relatedTitle}>{item.name}</h3>
-                    <p style={styles.relatedPrice}>${item.price.toFixed(2)}</p>
-                  </div>
-                </div>
+                <RelatedProductItem 
+                  key={item.id} 
+                  product={item} 
+                  addToCart={handleRelatedProductAddToCart} 
+                />
               ))}
             </div>
           </section>
@@ -586,8 +872,16 @@ const Cake = () => {
         </div>
       </footer>
 
-      {/* Cart Display Component */}
+    
       <CartDisplay />
+      
+     
+      {showNotification && (
+        <div style={styles.notification}>
+          <ShoppingCart size={16} style={{ marginRight: '8px' }} />
+          {notificationMessage}
+        </div>
+      )}
     </div>
   );
 };

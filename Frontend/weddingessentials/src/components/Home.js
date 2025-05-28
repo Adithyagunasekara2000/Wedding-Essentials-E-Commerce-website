@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 const Home = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const navigate = useNavigate();
-  // Navigation function (simulating router navigation)
+  
   const navigateTo = (path) => {
     console.log(`Navigating to: ${path}`);
-    // In a real app, this would use router navigation
+    navigate(path); // This will actually perform the navigation
   };
   
   const categories = [
-    { id: 'cakes', name: 'Wedding Cakes', image: '/images/cake.jpeg', description: 'Beautiful custom cakes for your special day' },
-    { id: 'invitations', name: 'Invitations', image: '/images/invitaton.jpeg', description: 'Elegant designs to impress your guests' },
-    { id: 'favors', name: 'Wedding Favors', image: '/images/favors.jpeg', description: 'Memorable gifts for your guests' }
+    { id: 'cakes', name: 'Wedding Cakes', image: '/images/cake.jpeg', description: 'Beautiful custom cakes for your special day' ,link:'Cake.js'},
+    { id: 'invitations', name: 'Invitations', image: '/images/invitaton.jpeg', description: 'Elegant designs to impress your guests',link:'Invitation.js' },
+    { id: 'favors', name: 'Wedding Favors', image: '/images/favors.jpeg', description: 'Memorable gifts for your guests',link:'Favor.js' }
   ];
 
   // Style objects
@@ -282,7 +283,7 @@ const Home = () => {
           <h1 style={styles.heroTitle}>Your Perfect Day</h1>
           <p style={styles.heroSubtitle}>Everything you need to make your wedding day unforgettable</p>
           <button 
-            onClick={() => navigate('/login')} 
+            onClick={() => navigateTo('/login')} 
             style={{...styles.ctaButton, backgroundColor: hoveredCategory === 'cta' ? '#c27862' : '#d48872'}}
             onMouseEnter={() => setHoveredCategory('cta')}
             onMouseLeave={() => setHoveredCategory(null)}
@@ -370,6 +371,10 @@ const Home = () => {
               <li style={styles.footerListItem}>
                 <a 
                   href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateTo('/about');
+                  }}
                   style={{
                     ...styles.footerLink,
                     ...(hoveredCategory === 'about' ? styles.footerLinkHover : {})
@@ -383,6 +388,10 @@ const Home = () => {
               <li style={styles.footerListItem}>
                 <a 
                   href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateTo('/contact');
+                  }}
                   style={{
                     ...styles.footerLink,
                     ...(hoveredCategory === 'contact' ? styles.footerLinkHover : {})
@@ -396,6 +405,10 @@ const Home = () => {
               <li style={styles.footerListItem}>
                 <a 
                   href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateTo('/faq');
+                  }}
                   style={{
                     ...styles.footerLink,
                     ...(hoveredCategory === 'faq' ? styles.footerLinkHover : {})
