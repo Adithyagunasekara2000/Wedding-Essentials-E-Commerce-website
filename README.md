@@ -80,10 +80,17 @@ Users can reach out via the contact form with their name, email, and message. Th
 
 ---
 
-### 📤 Upload Instructions
+## 📤 Upload Instructions
 
-✅ **Final Submission Includes:**
+#✅ **Final  Submission Includes:**
 
+
+#### Admindashboard
+![Screenshot 2025-06-28 165000](https://github.com/user-attachments/assets/aa0c8074-6f6a-42ac-8924-40279a70f3d9)
+
+
+#### Home page
+![Screenshot 2025-06-28 163133](https://github.com/user-attachments/assets/bc1e5b83-b555-4539-82f6-b38e50aa7bad)
 
 
 
